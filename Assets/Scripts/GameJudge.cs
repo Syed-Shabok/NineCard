@@ -97,7 +97,6 @@ public class GameJudge : MonoBehaviour
             //Debug.Log($"{cardSetsOnTable[cardSetsOnTable.IndexOf(bestCardSet)][0].GetCardOwner().gameObject.name} has won.");
 
             return new List<CardScript>(bestCardSet);
-            //return cardSetsOnTable.IndexOf(bestCardSet);
         }
         else
         {
@@ -109,7 +108,6 @@ public class GameJudge : MonoBehaviour
             //Debug.Log($"{cardSetsOnTable[cardSetsOnTable.IndexOf(bestCardSet)][0].GetCardOwner().gameObject.name} has won.");
 
             return new List<CardScript>(bestCardSet);
-            //return cardSetsOnTable.IndexOf(bestCardSet);
         }
     }
 
@@ -189,34 +187,6 @@ public class GameJudge : MonoBehaviour
         else
         {
             trackingDic[HandRank.HIGHCARD].Add(cardSet); 
-        }
-    }
-
-    private int GetHandRankValue(List<CardScript> cardSet)
-    {
-        if(CheckIfTray(cardSet))
-        {
-            return 5;
-        }
-        else if(CheckIfColorRun(cardSet))
-        {
-            return 4;
-        }
-        else if(CheckIfRun(cardSet))
-        {
-            return 3;
-        }
-        else if(CheckIfColor(cardSet))
-        {
-            return 2;
-        }
-        else if(CheckIfPair(cardSet))
-        {
-            return 1;
-        }
-        else
-        {
-            return 0; 
         }
     }
 

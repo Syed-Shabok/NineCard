@@ -163,8 +163,6 @@ public class HandRankChecker : MonoBehaviour
     {
         //Debug.Log("Checking for Color Run Sets:");
 
-        int colorRunSetCounter = 0;
-
         for(int i = 0; i < currentCardList.Count - 2; ++i)
         {
             //Debug.Log($"i={i}, Card: {cardList[i].GetCardRank()} of {cardList[i].GetCardSuit()}.");
@@ -182,15 +180,8 @@ public class HandRankChecker : MonoBehaviour
                 if(colorRunSet.Count == 3)
                 {
                     //Debug.Log("A Color Run Set has been found.");
-                    
-                    // cardSets.Add(setsAdded, new List<CardScript>(colorRunSet));
-                    // ++setsAdded;
-
-                    //listOfCardSets.Add(colorRunSet);
-
                     handRankWiseDec[HandRank.COLORRUN].Add(colorRunSet);
 
-                    ++colorRunSetCounter;
                     RemoveCardsFromList(colorRunSet);
                     --i;
                     break; 
@@ -249,8 +240,6 @@ public class HandRankChecker : MonoBehaviour
     {   
         //Debug.Log("Checking for Run Sets:");
 
-        int runSetCounter = 0;
-
         for(int i = 0; i < currentCardList.Count - 2; ++i)
         {
             //Debug.Log($"i={i}, Card: {cardList[i].GetCardRank()} of {cardList[i].GetCardSuit()}.");
@@ -267,15 +256,9 @@ public class HandRankChecker : MonoBehaviour
                 if(runSet.Count == 3)
                 {
                     //Debug.Log("A Run Set has been found.");
-                    
-                    // cardSets.Add(setsAdded, new List<CardScript>(runSet));
-                    // ++setsAdded;
-
-                    //listOfCardSets.Add(runSet);
 
                     handRankWiseDec[HandRank.RUN].Add(runSet);
 
-                    ++runSetCounter;
                     RemoveCardsFromList(runSet);
                     --i;
                     break; 
@@ -288,8 +271,6 @@ public class HandRankChecker : MonoBehaviour
 
     private void CheckForColorSets()
     {
-        int colorSetCounter = 0;
-
         foreach(Suit suitGroup in (Suit[])System.Enum.GetValues(typeof(Suit)))
         {   
             List<CardScript>colorSet = new List<CardScript>();
@@ -305,14 +286,8 @@ public class HandRankChecker : MonoBehaviour
                 {
                     //Debug.Log("A Color Set has been found.");
                     
-                    // cardSets.Add(setsAdded, colorSet);
-                    // ++setsAdded;
-
-                    //listOfCardSets.Add(colorSet);
-                    
                     handRankWiseDec[HandRank.COLOR].Add(colorSet);
 
-                    ++colorSetCounter;
                     RemoveCardsFromList(colorSet);
                     break;
                 }
@@ -324,7 +299,6 @@ public class HandRankChecker : MonoBehaviour
 
     private void CheckForPairs()
     {
-        int pairSetCounter = 0;
 
         foreach(Rank rankGroup in ((Rank[])System.Enum.GetValues(typeof(Rank))).Reverse())
         {
@@ -347,14 +321,8 @@ public class HandRankChecker : MonoBehaviour
 
                 //Debug.Log("A Pair Set has been found.");
                 
-                // cardSets.Add(setsAdded, pairSet);
-                // ++setsAdded;
-
-                //listOfCardSets.Add(pairSet);
-                
                 handRankWiseDec[HandRank.PAIR].Add(pairSet);
 
-                ++pairSetCounter;
                 RemoveCardsFromList(pairSet);
             }
         }
@@ -393,11 +361,6 @@ public class HandRankChecker : MonoBehaviour
                 if(highCardSet.Count == 3)
                 {
                     //Debug.Log("A High Card Set has been found.");
-                    
-                    // cardSets.Add(setsAdded, new List<CardScript>(highCardSet));
-                    // ++setsAdded;
-
-                    //listOfCardSets.Add(highCardSet);
                     
                     handRankWiseDec[HandRank.HIGHCARD].Add(highCardSet);
 
@@ -519,22 +482,6 @@ public class HandRankChecker : MonoBehaviour
         }
     }
     
-    // // (For testing) Prints details of each card in each of the card sets. 
-    // private void PrintCardSets()
-    // {   
-    //     Debug.Log($"{this.gameObject.name} card sets are:");
-
-    //     foreach(var set in cardSets)
-    //     {
-    //         Debug.Log($"Set {set.Key}: ");
-
-    //         foreach(CardScript card in set.Value)
-    //         {
-    //             Debug.Log($"{card.GetCardRank()} of {card.GetCardSuit()}");
-    //         }
-    //     }
-    // }
-
     private void PrintCardList(List<CardScript> cardList)
     {
         foreach(CardScript card in cardList)

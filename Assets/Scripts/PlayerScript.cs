@@ -149,20 +149,6 @@ public class PlayerScript : MonoBehaviour
         table.PlacePlayerCardsOnTable(playerTurn, currentCardSet);
     }
 
-
-    private void RemoveCardSetFromScreen()
-    {
-        GameObject playerCardSets = this.transform.Find($"{this.gameObject.name} Sets").gameObject;
-        Destroy(playerCardSets.transform.Find($"Set {cardSetsPlaced + 1}").gameObject);
-    }
-
-    // (Testing) 
-    // public void ShowCardSets()
-    // {
-    //     handRankChecker.GetCardSets(this, handCards);
-    // }
-
-
     public void RemoveCardsFromPlayer(List<CardScript> cardSet)
     {
         foreach(CardScript card in cardSet)
