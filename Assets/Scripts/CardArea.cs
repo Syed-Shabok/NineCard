@@ -6,7 +6,8 @@ using UnityEngine.EventSystems;
 
 public class CardArea : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPointerExitHandler
 {
-    public void OnPointerEnter(PointerEventData eventData) 
+    // Runs when player's coursor enters the Card Area. 
+	public void OnPointerEnter(PointerEventData eventData) 
     {
 		if(eventData.pointerDrag == null)
         {
@@ -16,10 +17,11 @@ public class CardArea : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPoin
 		DraggableObject d = eventData.pointerDrag.GetComponent<DraggableObject>();
 		if(d != null) 
         {
-			d.placeholderParent = this.transform;
+			d.PlaceholderParent = this.transform;
 		}
 	}
 	
+	// Runs when player's cursor exits the Card Area. 
 	public void OnPointerExit(PointerEventData eventData) 
     {
 		if(eventData.pointerDrag == null)
@@ -28,18 +30,19 @@ public class CardArea : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPoin
         }
 
 		DraggableObject d = eventData.pointerDrag.GetComponent<DraggableObject>();
-		if(d != null && d.placeholderParent == this.transform) 
+		if(d != null && d.PlaceholderParent == this.transform) 
         {
-			d.placeholderParent = d.playerHand;
+			d.PlaceholderParent = d.PlayerHand;
 		}
 	}
 	
+	// Runs when player drops card into Card Area. 
 	public void OnDrop(PointerEventData eventData) 
     {
 		DraggableObject d = eventData.pointerDrag.GetComponent<DraggableObject>();
 		if(d != null) 
         {
-			d.playerHand = this.transform;
+			d.PlayerHand = this.transform;
 		}
 
         Debug.Log (eventData.pointerDrag.name + " was dropped on " + gameObject.name);

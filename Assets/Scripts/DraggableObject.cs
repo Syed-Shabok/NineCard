@@ -6,20 +6,21 @@ using UnityEngine.UI;
 
 public class DraggableObject : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {   
-    public Transform playerHand = null;
-	public Transform placeholderParent = null;
-	private GameObject placeholder = null;
+    public Transform PlayerHand = null;
+	public Transform PlaceholderParent = null;
+	private GameObject _placeholder = null;
 	
+	// Runs when player starts dragging a card.
 	public void OnBeginDrag(PointerEventData eventData) 
     {
-		placeholder = new GameObject();
-		placeholder.transform.SetParent(this.transform.parent);
-		LayoutElement le = placeholder.AddComponent<LayoutElement>();
+		_placeholder = new GameObject();
+		_placeholder.transform.SetParent(this.transform.parent);
+		LayoutElement le = _placeholder.AddComponent<LayoutElement>();
 
-		placeholder.transform.SetSiblingIndex(this.transform.GetSiblingIndex());
+		_placeholder.transform.SetSiblingIndex(this.transform.GetSiblingIndex());
 		
-		playerHand = this.transform.parent;
-		placeholderParent = playerHand;
+		PlayerHand = this.transform.parent;
+		PlaceholderParent = PlayerHand;
 		this.transform.SetParent(this.transform.parent.parent);
 		
 		GetComponent<Image>().raycastTarget = false;
@@ -27,24 +28,25 @@ public class DraggableObject : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         Debug.Log ("Started Dragging.");
 	}
 	
+	// Runs while player is dragging a card.
 	public void OnDrag(PointerEventData eventData) 
     {
 		this.transform.position = eventData.position;
 
-		if(placeholder.transform.parent != placeholderParent)
+		if(_placeholder.transform.parent != PlaceholderParent)
         {
-            placeholder.transform.SetParent(placeholderParent);
+            _placeholder.transform.SetParent(PlaceholderParent);
         }
 
-		int newSiblingIndex = placeholderParent.childCount;
+		int newSiblingIndex = PlaceholderParent.childCount;
 
-		for(int i=0; i < placeholderParent.childCount; ++i) 
+		for(int i=0; i < PlaceholderParent.childCount; ++i) 
         {
-			if(this.transform.position.x < placeholderParent.GetChild(i).position.x) 
+			if(this.transform.position.x < PlaceholderParent.GetChild(i).position.x) 
             {
 				newSiblingIndex = i;
 
-				if(placeholder.transform.GetSiblingIndex() < newSiblingIndex)
+				if(_placeholder.transform.GetSiblingIndex() < newSiblingIndex)
                 {
                     --newSiblingIndex;
                 }
@@ -53,16 +55,17 @@ public class DraggableObject : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 			}
 		}
 
-		placeholder.transform.SetSiblingIndex(newSiblingIndex);
+		_placeholder.transform.SetSiblingIndex(newSiblingIndex);
 	}
 	
+	// Runs when player stops dragging a card.
 	public void OnEndDrag(PointerEventData eventData) 
     {
-		this.transform.SetParent(playerHand);
-		this.transform.SetSiblingIndex(placeholder.transform.GetSiblingIndex());
+		this.transform.SetParent(PlayerHand);
+		this.transform.SetSiblingIndex(_placeholder.transform.GetSiblingIndex());
 		GetComponent<Image>().raycastTarget = true;
 
-		Destroy(placeholder);
+		Destroy(_placeholder);
 
         Debug.Log ("Stopped Dragging.");
 	}

@@ -8,31 +8,30 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
-    [SerializeField] private ToggleGroup noOfOpponentsToggle;
-    [SerializeField] private GameObject opponentSelectionMenu;
-    [SerializeField] private GameObject readyButton;
-    [SerializeField] private GameObject gameResultsMenu;
-    [SerializeField] private TextMeshProUGUI declareWinnerText;
-    [SerializeField] private GameObject gameDrawMessage;
-    [SerializeField] private GameObject sortCardsButton;
-
-    [SerializeField] private List<GameObject> playerOptions = new List<GameObject>();
-    [SerializeField] private DeckScript deck;
-    [SerializeField] private TableScript table;
-    [SerializeField] private GameManager gameManager;
-
-    [SerializeField] private List<PlayerScript> playerList =  new List<PlayerScript>();
+    [SerializeField] private ToggleGroup mNoOfOpponentsToggle;
+    [SerializeField] private GameObject mOpponentSelectionMenu;
+    [SerializeField] private GameObject mReadyButton;
+    [SerializeField] private GameObject mGameResultsMenu;
+    [SerializeField] private TextMeshProUGUI mDeclareWinnerText;
+    [SerializeField] private GameObject mGameDrawMessage;
+    [SerializeField] private GameObject mSortCardsButton;
+    [SerializeField] private List<GameObject> mPlayerOptions = new List<GameObject>();
+    [SerializeField] private DeckScript mDeck;
+    [SerializeField] private TableScript mTable;
+    [SerializeField] private GameManager mGameManager;
+    private List<PlayerScript> _playerList =  new List<PlayerScript>();
     public static int noOfPlayers;
 
     void Start()
     {
         if(PlayerPrefs.GetInt("isReplayed") == 1)
         {
-            opponentSelectionMenu.SetActive(false);
+            mOpponentSelectionMenu.SetActive(false);
             RestartGame();
         }
     }
 
+    // Resets the game when there is a Draw.
     private void RestartGame()
     {
         Debug.Log("Restarting game.");
@@ -41,25 +40,27 @@ public class UIManager : MonoBehaviour
         SetUpOpponents(PlayerPrefs.GetInt("noOfOpponents")); 
 
         FindPlayers(); 
-        deck.DistributeCards(PlayerPrefs.GetInt("noOfOpponents"));
-        table.SetUpCardPlacementAreas(noOfPlayers);
-        gameManager.FindPlayers();
-        readyButton.SetActive(true);
+        mDeck.DistributeCards(PlayerPrefs.GetInt("noOfOpponents"));
+        mTable.SetUpCardPlacementAreas(noOfPlayers);
+        mGameManager.FindPlayers();
+        mReadyButton.SetActive(true);
     }
 
+    // Loads the "Play Again" menu after a game is finished. 
     public void PlayAgainScene(PlayerScript playerWhoWon)
     {
         DisableAllOptions();
         GameObject.Find("Main Player").GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -637);
-        gameResultsMenu.SetActive(true);
-        declareWinnerText.SetText($"{playerWhoWon.gameObject.name} has won!");
+        mGameResultsMenu.SetActive(true);
+        mDeclareWinnerText.SetText($"{playerWhoWon.gameObject.name} has won!");
     }
 
+    // Loads the "Game Draw? menu when the game is a draw.
     public void ShowGameDrawMessage()
     {
         DisableAllOptions();
         GameObject.Find("Main Player").GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -589);
-        gameDrawMessage.SetActive(true);
+        mGameDrawMessage.SetActive(true);
 
         StartCoroutine(GameReloadAfterDelay(3.0f));
     }
@@ -75,9 +76,9 @@ public class UIManager : MonoBehaviour
     // Sets up the number of Opponents for the current game, and distribues cards to them. 
     public void StartGameButton()
     {
-        Toggle option = noOfOpponentsToggle.ActiveToggles().FirstOrDefault();
-        opponentSelectionMenu.SetActive(false);
-        readyButton.SetActive(true);
+        Toggle option = mNoOfOpponentsToggle.ActiveToggles().FirstOrDefault();
+        mOpponentSelectionMenu.SetActive(false);
+        mReadyButton.SetActive(true);
 
         Debug.Log($"Player chose option: {option.GetComponentInChildren<TextMeshProUGUI>().text}");
         int noOfOpponents = int.Parse(option.GetComponentInChildren<TextMeshProUGUI>().text);
@@ -86,9 +87,9 @@ public class UIManager : MonoBehaviour
         SetUpOpponents(noOfOpponents); 
 
         FindPlayers(); 
-        deck.DistributeCards(noOfOpponents);
-        table.SetUpCardPlacementAreas(noOfPlayers);
-        gameManager.FindPlayers();
+        mDeck.DistributeCards(noOfOpponents);
+        mTable.SetUpCardPlacementAreas(noOfPlayers);
+        mGameManager.FindPlayers();
     }
 
     // Sets up the UI based on user preferance (i.e. the no. of opponents the user wants).
@@ -102,22 +103,22 @@ public class UIManager : MonoBehaviour
         {
             case 1:
             Debug.Log($"Player chose {noOfOpponents} opponents"); 
-            playerOptions[0].SetActive(true);
+            mPlayerOptions[0].SetActive(true);
             break;
 
             case 2:
             Debug.Log($"Player chose {noOfOpponents} opponents"); 
-            playerOptions[1].SetActive(true);
+            mPlayerOptions[1].SetActive(true);
             break;
 
             case 3:
             Debug.Log($"Player chose {noOfOpponents} opponents"); 
-            playerOptions[2].SetActive(true);
+            mPlayerOptions[2].SetActive(true);
             break;
 
             case 4: 
             Debug.Log($"Player chose {noOfOpponents} opponents");
-            playerOptions[3].SetActive(true);
+            mPlayerOptions[3].SetActive(true);
             break;
         }
     }
@@ -125,38 +126,34 @@ public class UIManager : MonoBehaviour
     // Disables all player gameObjects.
     private void DisableAllOptions()
     {   
-        for(int i = 0; i < playerOptions.Count; ++i)
+        for(int i = 0; i < mPlayerOptions.Count; ++i)
         {
-            playerOptions[i].SetActive(false);
+            mPlayerOptions[i].SetActive(false);
         }
     }
 
     // Adds all players from the current game into the playerList.
     private void FindPlayers()
     {   
-        playerList.Add(GameObject.Find("Main Player").GetComponent<PlayerScript>());
+        _playerList.Add(GameObject.Find("Main Player").GetComponent<PlayerScript>());
 
         for(int i = 1; i < noOfPlayers; ++i)
         {
-            playerList.Add(GameObject.Find($"Player {i}").GetComponent<PlayerScript>());
+            _playerList.Add(GameObject.Find($"Player {i}").GetComponent<PlayerScript>());
         }
     }
 
+    // Sorts Main Player's cards in decending order.
     public void SortMainPlayerCards()
     {
-        sortCardsButton.GetComponent<Button>().interactable = false;
+        mSortCardsButton.GetComponent<Button>().interactable = false;
         GameObject.Find("Main Player").GetComponent<PlayerScript>().SortMainPlayerCardsList();
     }
 
-    public void DeclareFourOfAKind()
-    {
-        GameObject.Find("Main Player").GetComponent<PlayerScript>().SortMainPlayerCardsList();
-
-    }
-
+    // Starts placing player cards on the table when the player presses the Ready Button. 
     public void ReadyButton()
     {
-        readyButton.SetActive(false);
+        mReadyButton.SetActive(false);
         MakeCardSets();
         StartCoroutine(StartGameAfterDelay(1.0f));
     }
@@ -164,13 +161,13 @@ public class UIManager : MonoBehaviour
     private IEnumerator StartGameAfterDelay(float delay)
     {  
         yield return new WaitForSeconds(delay);
-        gameManager.StartGame();
+        mGameManager.StartGame();
     }
     
     // Creates 3 sets of cards for each player. 
     public void MakeCardSets()
     {
-        foreach(PlayerScript player in playerList)
+        foreach(PlayerScript player in _playerList)
         {   
             player.gameObject.transform.Find($"{player.gameObject.name} Sets").gameObject.SetActive(true);
             player.gameObject.transform.Find($"{player.gameObject.name} Cards").gameObject.SetActive(false);
@@ -186,23 +183,7 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // (Testing)
-    public void ShowCardSets()
-    {
-        return;
-        
-        // foreach(PlayerScript player in playerList)
-        // {
-        //     player.ShowCardSets();
-        // }
-    }
-
-    // (Testing) Place Cards button function.
-    public void PlaceCards()
-    {
-        gameManager.StartGame();
-    }
-
+    // Creates a new game for the player. 
     public void PlayAgainButton()
     {
         Debug.Log("ReloadScene()");
@@ -212,6 +193,7 @@ public class UIManager : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
+    // Reloads the game after a draw. 
     public void ReloadScene()
     {   
         Debug.Log("ReloadScene()");

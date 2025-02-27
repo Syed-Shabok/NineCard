@@ -6,31 +6,30 @@ using UnityEngine.UI;
 
 public class PlayerScript : MonoBehaviour
 {
-    [SerializeField] private List<CardScript> handCards = new List<CardScript>();
-    private List<Card> cardList = new List<Card>();
-    [SerializeField] private List<CardScript> setCards = new List<CardScript>();  // Holds Referance to the on screen Card Set Objects. 
-    private List<List<CardScript>> playerCardSets = new List<List<CardScript>>();
-    private Dictionary<int, List<CardScript>> cardSetDictionary = new Dictionary<int, List<CardScript>>();
-    [SerializeField] private TableScript table;
-    private int cardSetsPlaced = 0;
-    private int leadsPlayed = 0;
-    [SerializeField] private int leadsWon = 0;
-    [SerializeField] private GameObject pointsBar; 
-    [SerializeField] private HandRankChecker handRankChecker; 
+    [SerializeField] private List<CardScript> mHandCards = new List<CardScript>(); // Holds rerance to player's card list 
+    private List<Card> _cardList = new List<Card>(); // List of Card instances received from DecScript. 
+    [SerializeField] private List<CardScript> mSetCards = new List<CardScript>();  // Holds Referance to "Card Set's" cards in the scene.  
+    private List<List<CardScript>> _playerCardSets = new List<List<CardScript>>(); // List of Card Sets made by player.
+    [SerializeField] private TableScript mTable; 
+    private int _cardSetsPlaced = 0; // Number of card Sets places by a Player. 
+    private int _leadsPlayed = 0; 
+    private int _leadsWon = 0;
+    [SerializeField] private GameObject mPointsBar; // Referance to player's points indicator in the scene. 
+    [SerializeField] private HandRankChecker mHandRankChecker; // Reference to HandRankChecker, used for making player's card sets
 
     void Start()
     {
-        table = GameObject.Find("Table").GetComponent<TableScript>();
-        handRankChecker = GameObject.Find("Hand Rank Checker").GetComponent<HandRankChecker>();
+        mTable = GameObject.Find("Table").GetComponent<TableScript>();
+        mHandRankChecker = GameObject.Find("Hand Rank Checker").GetComponent<HandRankChecker>();
     }
 
     // Adds a card to the players hand (i.e. the cardList list).
     public void AddCardToHand(Card card)
     {   
-        cardList.Add(card);
+        _cardList.Add(card);
 
         // After players gets 9 cards, SetPlayerCards() runs.
-        if(cardList.Count == 9)
+        if(_cardList.Count == 9)
         {  
             SetPlayerCards();
         }
@@ -41,14 +40,15 @@ public class PlayerScript : MonoBehaviour
     {
         //Debug.Log($"Setting {this.gameObject.name} cards. Total HandCards: {handCards.Count}");
     
-        for (int i = 0; i < handCards.Count; ++i)
+        for (int i = 0; i < mHandCards.Count; ++i)
         {   
             //Debug.Log($"Attempting to set {this.gameObject.name}'s card-{i+1}.");
-            handCards[i].SetCardScript(cardList[i]);
-            handCards[i].SetCardOwner(this);
+            mHandCards[i].SetCardScript(_cardList[i]);
+            mHandCards[i].SetCardOwner(this);
         }
     }
 
+    // Gets the Main Player's cards from the scene and sorts them into appropriate card sets. 
     public void GetMainPlayerCardSets()
     {
         int index = 0;
@@ -65,64 +65,66 @@ public class PlayerScript : MonoBehaviour
                 ++index;
             }
 
-            playerCardSets.Add(newSet);
+            _playerCardSets.Add(newSet);
         }
 
         GameJudge judge = GameObject.Find("Game Judge").GetComponent<GameJudge>();
 
-        judge.SortMainPlayerCards(playerCardSets);
+        // Sorts Main Player's card sets based on HandRank.  
+        judge.SortMainPlayerCards(_playerCardSets);
 
         UpdateCardSetsOnScreen();
         //PrintCardSets();
     }
 
-
+    // Creates card sets for Bot Players.  
     public void GetPlayerCardSets()
     {
         Debug.Log($"Fetching {this.gameObject.name} card sets");
 
-        List<List<CardScript>> tempCardSets = handRankChecker.GetCardSets(this, handCards);
+        // Gets appropriate card sets based on bot's cards. 
+        List<List<CardScript>> tempCardSets = mHandRankChecker.GetCardSets(this, mHandCards);
         
-        playerCardSets = new List<List<CardScript>>();
+        _playerCardSets = new List<List<CardScript>>();
         foreach (var set in tempCardSets)
         {
-            playerCardSets.Add(new List<CardScript>(set));
+            _playerCardSets.Add(new List<CardScript>(set));
         }
 
         //PrintListOfCardSets();
         UpdateCardSetsOnScreen();
     }
 
+    // Sorts Main Player's cards in Decending order.
     public void SortMainPlayerCardsList()
     {   
         Debug.Log("SortMainPlayerCardsList() has run");
  
-        cardList.Sort((card1, card2) => 
+        _cardList.Sort((card1, card2) => 
             GetRankValue(card2.GetCardRank()).CompareTo(GetRankValue(card1.GetCardRank())));
 
         SetPlayerCards();
     }
 
-    // Sets the fields of the cards in setCards list.   
+    // Sets the fields of the cards in setCards list.     
     private void UpdateCardSetsOnScreen()
     {
         int index = 0; 
-        foreach(var set in playerCardSets)
+        foreach(var set in _playerCardSets)
         {
             foreach(CardScript card in set)
             {
                 card.SetCardOwner(this); // Also sets this player as the owner of this card.
-                setCards[index].SetCardScript(card);
+                mSetCards[index].SetCardScript(card);
                 ++index;
             }
         }
     }
 
-
-    // Places the left-most card set of the player. 
+    // Places the left-most (best) card set of the player. 
     public void PlaceBestCardSet(int playerTurn)
     {
-        if(cardSetsPlaced > 2)
+        if(_cardSetsPlaced > 2)
         {
             Debug.Log("All turns complete.");
             return;
@@ -132,53 +134,50 @@ public class PlayerScript : MonoBehaviour
         //PrintCardList(this.playerCardSets[cardSetsPlaced]);
 
 
-        List<CardScript> currentCardSet = new List<CardScript>(this.playerCardSets[cardSetsPlaced]);
+        List<CardScript> currentCardSet = new List<CardScript>(this._playerCardSets[_cardSetsPlaced]);
 
         GameObject CardSetsGameObjects = this.transform.Find($"{this.gameObject.name} Sets").gameObject;
-        Destroy(CardSetsGameObjects.transform.Find($"Set {cardSetsPlaced + 1}").gameObject);
+        Destroy(CardSetsGameObjects.transform.Find($"Set {_cardSetsPlaced + 1}").gameObject);
 
         // Removes the placed cards from the setCards list to maintain consistancy.
         for(int i = 0; i < 3; ++i)
         {
-            setCards.RemoveAt(0);
+            mSetCards.RemoveAt(0);
         }
         
-        ++cardSetsPlaced;
-        ++leadsPlayed;
+        ++_cardSetsPlaced;
+        ++_leadsPlayed;
         
-        table.PlacePlayerCardsOnTable(playerTurn, currentCardSet);
+        // Places the Card Set on the Table. 
+        mTable.PlacePlayerCardsOnTable(playerTurn, currentCardSet);
     }
-
-    public void RemoveCardsFromPlayer(List<CardScript> cardSet)
-    {
-        foreach(CardScript card in cardSet)
-        {
-            handCards.Remove(card);
-        }
-    }
-
+    
+    // Updates Player's Score.
     public void GivePointToPlayer()
     {
         Debug.Log($"{this.gameObject.name} has won this lead.");
         UpdatePointBar();
-        ++leadsWon;
+        ++_leadsWon;
     }
 
-    // Number of leads played not updated correctly, must look into it.
+    // Shows player's score in the scene. 
     private void UpdatePointBar()
     {   
-        GameObject pointIndicator = pointsBar.transform.GetChild(leadsPlayed - 1).gameObject;
+        GameObject pointIndicator = mPointsBar.transform.GetChild(_leadsPlayed - 1).gameObject;
         pointIndicator.GetComponent<Image>().color = Color.yellow;
     }
+
+    // Returns the number of leads won by this player. 
+    public int GetLeadsWon()
+    {
+        return _leadsWon;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private int GetRankValue(Rank rank)
     {
         return (int)rank;
-    }
-
-    public int GetLeadsWon()
-    {
-        return leadsWon;
     }
 
     private void PrintCardList(List<CardScript> cardList)
@@ -193,13 +192,13 @@ public class PlayerScript : MonoBehaviour
     {   
         Debug.Log($"{this.gameObject.name} card sets are:");
 
-        for(int i = 0; i < playerCardSets.Count; ++i)
+        for(int i = 0; i < _playerCardSets.Count; ++i)
         {
             Debug.Log($"Set - {i}:");
 
-            for(int j = 0; j < playerCardSets[i].Count; ++j)
+            for(int j = 0; j < _playerCardSets[i].Count; ++j)
             {
-                Debug.Log($"{playerCardSets[i][j].GetCardRank()} of {playerCardSets[i][j].GetCardSuit()}");
+                Debug.Log($"{_playerCardSets[i][j].GetCardRank()} of {_playerCardSets[i][j].GetCardSuit()}");
             }
         }
     }

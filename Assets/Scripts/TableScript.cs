@@ -5,81 +5,70 @@ using UnityEngine;
 
 public class TableScript : MonoBehaviour
 {   
-    private List<List<CardScript>> cardSetsOnTable = new List<List<CardScript>>();
-    [SerializeField] private List<GameObject> cardPlacementAreas = new List<GameObject>();
-    [SerializeField] GameManager gameManager;
-    [SerializeField] GameJudge gameJudge;
+    private List<List<CardScript>> _cardSetsOnTable = new List<List<CardScript>>();
+    private List<GameObject> _cardPlacementAreas = new List<GameObject>();
+    [SerializeField] private GameManager mGameManager;
+    [SerializeField] private GameJudge mGameJudge;
 
+    // Gets the card placement areas for each player. 
     private void FindPlacementAreas(int noOfPlayers)
     {   
-        cardPlacementAreas.Add(GameObject.Find("Main Player Playing Location"));
+        _cardPlacementAreas.Add(GameObject.Find("Main Player Playing Location"));
 
         for(int i = 1; i < noOfPlayers; ++i)
         {
-            cardPlacementAreas.Add(GameObject.Find($"Player {i} Playing Location"));
+            _cardPlacementAreas.Add(GameObject.Find($"Player {i} Playing Location"));
         }
     }
 
+    // Based on the number of players, this sets up the card placement areas for all players.
     public void SetUpCardPlacementAreas(int noOfPlayers)
     {
         FindPlacementAreas(noOfPlayers);
     }
 
+    // Places a player's card sets in that player's card placement location. 
     public void PlacePlayerCardsOnTable(int playerTurn, List<CardScript> cardSet)
     {   
-        cardSetsOnTable.Add(new List<CardScript>(cardSet));
+        _cardSetsOnTable.Add(new List<CardScript>(cardSet));
         
         for(int i = 0; i < cardSet.Count; ++i)
         {
-            GameObject newCard = Instantiate(cardSet[i].gameObject, cardPlacementAreas[playerTurn].transform);
+            GameObject newCard = Instantiate(cardSet[i].gameObject, _cardPlacementAreas[playerTurn].transform);
         }
 
         // Check if round should continue
-        if (gameManager.IsRoundOngoing()) 
+        if (mGameManager.IsRoundOngoing()) 
         {
-            gameManager.NextTurn();
+            mGameManager.NextTurn();
         }
     }
 
-    // Function that Checks which player has won a round (Currenlty at random).
+    // Function that Checks which player has won a round. 
     public void FindLeadWinner()
     {   
         Debug.Log("FindLeadWinner() has run.");
         Debug.Log("Card Sets on Table:");
         PrintCardSetsOnTable();
 
-
-        //int winningPlayerIndex = gameJudge.FindWinner(new List<List<CardScript>>(cardSetsOnTable));
-
-        List<CardScript> winningCardSet = gameJudge.FindWinner(new List<List<CardScript>>(cardSetsOnTable));
-        //int winningPlayerIndex = cardSetsOnTable.IndexOf(winningCardSet);
-
-        int playerIndex = -1;
-        for (int i = 0; i < cardSetsOnTable.Count; ++i)
-        {
-            if (cardSetsOnTable[i].SequenceEqual(winningCardSet))
-            {
-                playerIndex = i;
-                break;
-            }
-        }
+        // Checks all card sets on table and decides the winning card set.
+        List<CardScript> winningCardSet = mGameJudge.FindWinner(new List<List<CardScript>>(_cardSetsOnTable));
 
         ClearTable();
 
-        Debug.Log($"Winning P Index: {playerIndex}");
         Debug.Log($"Winning Player: {winningCardSet[0].GetCardOwner().gameObject.name}");
 
-        int winningPlayerIndex = gameManager.GetPlayerIndex(winningCardSet[0].GetCardOwner());
+        int winningPlayerIndex = mGameManager.GetPlayerIndex(winningCardSet[0].GetCardOwner());
 
-        gameManager.NextTurn(winningPlayerIndex);
+        mGameManager.NextTurn(winningPlayerIndex);
     }
     
-
+    // Removes all card sets from the table. 
     public void ClearTable()
     {
         Debug.Log("ClearTable() has started.");
 
-        foreach (GameObject area in cardPlacementAreas)
+        foreach (GameObject area in _cardPlacementAreas)
         {
             int childCount = area.transform.childCount;
             for (int i = childCount - 1; i >= 0; --i) 
@@ -88,22 +77,26 @@ public class TableScript : MonoBehaviour
             }
         }
 
-        cardSetsOnTable.Clear();
+        _cardSetsOnTable.Clear();
 
         Debug.Log("ClearTable() has run.");
     }
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
 
     private void PrintCardSetsOnTable()
     {   
         Debug.Log($"{this.gameObject.name} card sets are:");
 
-        for(int i = 0; i < cardSetsOnTable.Count; ++i)
+        for(int i = 0; i < _cardSetsOnTable.Count; ++i)
         {
             Debug.Log($"Set - {i}:");
 
-            for(int j = 0; j < cardSetsOnTable[i].Count; ++j)
+            for(int j = 0; j < _cardSetsOnTable[i].Count; ++j)
             {
-                Debug.Log($"{cardSetsOnTable[i][j].GetCardRank()} of {cardSetsOnTable[i][j].GetCardSuit()}");
+                Debug.Log($"{_cardSetsOnTable[i][j].GetCardRank()} of {_cardSetsOnTable[i][j].GetCardSuit()}");
             }
         }
     }

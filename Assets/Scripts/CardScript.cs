@@ -7,21 +7,21 @@ public class CardScript : MonoBehaviour
 {   
     [SerializeField] private Suit mCardSuit;
     [SerializeField] private Rank mCardRank;
-    [SerializeField] private Image CardImageComponent;
+    [SerializeField] private Image mCardImageComponent;
     private PlayerScript cardOwner; 
 
     void Awake()
     {
-        if(CardImageComponent == null) 
+        if(mCardImageComponent == null) 
         {
-            this.CardImageComponent = GetComponent<Image>();
+            this.mCardImageComponent = GetComponent<Image>();
         }
     }
 
     // Sets all the fields of the card's CardScript component. 
     public void SetCardScript(Card card)
     {   
-        if(this.CardImageComponent == null)
+        if(this.mCardImageComponent == null)
         {
             Debug.Log("Can not find card object. Check if cards objects is SetActive(false)");
             return;
@@ -29,7 +29,7 @@ public class CardScript : MonoBehaviour
 
         this.mCardSuit = card.GetCardSuit();
         this.mCardRank = card.GetCardRank();
-        this.CardImageComponent.sprite = card.GetCardSprite();
+        this.mCardImageComponent.sprite = card.GetCardSprite();
 
         //Debug.Log($"{this.gameObject.name} was set successfully.");
     }
@@ -37,7 +37,7 @@ public class CardScript : MonoBehaviour
     // Sets all the fields of the card's CardScript component. 
     public void SetCardScript(CardScript card)
     {   
-        if(this.CardImageComponent == null)
+        if(this.mCardImageComponent == null)
         {
             Debug.Log("Can not find card object. Check if cards objects is SetActive(false)");
             return;
@@ -45,34 +45,39 @@ public class CardScript : MonoBehaviour
 
         this.mCardSuit = card.GetCardSuit();
         this.mCardRank = card.GetCardRank();
-        this.CardImageComponent.sprite = card.GetCardImage();
+        this.mCardImageComponent.sprite = card.GetCardImage();
 
         //Debug.Log($"{this.gameObject.name} was set successfully.");
     }
 
+    // Sets the owner of CardScript instance. 
     public void SetCardOwner(PlayerScript player)
     {
         this.cardOwner = player;
     }
     
+    // Returns the PlayerScript owner of CardScript instance. 
     public PlayerScript GetCardOwner()
     {
         return this.cardOwner;
     }
 
+    // Returns CardScript instance's Suit. 
     public Suit GetCardSuit()
     {
         return this.mCardSuit;
     }
 
+    // Returns CardScript instance's Rank. 
     public Rank GetCardRank()
     {
         return this.mCardRank;
     }
 
+    // Returns CardScript instance's Sprite Image. 
     public Sprite GetCardImage()
     {
-        return this.CardImageComponent.sprite;
+        return this.mCardImageComponent.sprite;
     }   
 
 }

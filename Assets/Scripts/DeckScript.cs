@@ -9,8 +9,8 @@ public class DeckScript : MonoBehaviour
 {
     [SerializeField] private List<Card> mDeck = new List<Card>(); //List of all cards in the Deck.
     [SerializeField] private List<Sprite> mCardImages = new List<Sprite>(); //List of card images, assigned in the inspector.
-    [SerializeField] private List<PlayerScript> playerList =  new List<PlayerScript>();
-    [SerializeField] private int numberOfPlayers = 5;
+    private List<PlayerScript> _playerList =  new List<PlayerScript>();
+    private int _numberOfPlayers = 5;
     
     void Start()
     {
@@ -57,11 +57,11 @@ public class DeckScript : MonoBehaviour
     // Finds all current players of the game and puts them into the playerList.
     private void FindPlayers()
     {   
-        playerList.Add(GameObject.Find("Main Player").GetComponent<PlayerScript>());
+        _playerList.Add(GameObject.Find("Main Player").GetComponent<PlayerScript>());
 
-        for(int i = 1; i < numberOfPlayers; ++i)
+        for(int i = 1; i < _numberOfPlayers; ++i)
         {
-            playerList.Add(GameObject.Find($"Player {i}").GetComponent<PlayerScript>());
+            _playerList.Add(GameObject.Find($"Player {i}").GetComponent<PlayerScript>());
         }
     }
 
@@ -70,19 +70,19 @@ public class DeckScript : MonoBehaviour
     {   
         Debug.Log("DistributeCards() has run.");
 
-        this.numberOfPlayers = noOfOpponents + 1;
+        this._numberOfPlayers = noOfOpponents + 1;
 
         FindPlayers();
 
         int index = 0;
-        for(int i = 0; i < numberOfPlayers; ++i)
+        for(int i = 0; i < _numberOfPlayers; ++i)
         {
-            Debug.Log($"Giving cards to {playerList[i].gameObject.name}:");
+            Debug.Log($"Giving cards to {_playerList[i].gameObject.name}:");
 
             // Each player gets 9 cards. 
             for(int j = 0; j < 9; ++j) 
             {
-                playerList[i].AddCardToHand(mDeck[index]);
+                _playerList[i].AddCardToHand(mDeck[index]);
                 ++index;
             }
         }
@@ -102,17 +102,20 @@ public class DeckScript : MonoBehaviour
         this._rank = rank;
         this._CardImage = cardSprite;
     }
-
+    
+    // Returns Card's Suit. 
     public Suit GetCardSuit()
     {
         return this._suit;
     }
 
+    // Returns Card's Rank. 
     public Rank GetCardRank()
     {
         return this._rank;
     }
 
+    // Returns Card's Sprite Image. 
     public Sprite GetCardSprite()
     {
         return _CardImage;

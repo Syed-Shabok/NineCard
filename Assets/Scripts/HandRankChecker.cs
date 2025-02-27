@@ -7,6 +7,7 @@ using UnityEngine;
 
 public class HandRankChecker : MonoBehaviour
 {   
+    // HandRank-wise card set Dictionary used in sorting functions. 
     private Dictionary<HandRank, List<List<CardScript>>> handRankWiseDec = new Dictionary<HandRank, List<List<CardScript>>>
                                                         {
                                                             {HandRank.TREY, new List<List<CardScript>>()},
@@ -16,10 +17,10 @@ public class HandRankChecker : MonoBehaviour
                                                             {HandRank.PAIR, new List<List<CardScript>>()},
                                                             {HandRank.HIGHCARD, new List<List<CardScript>>()}
                                                         };
-    private List<List<CardScript>> listOfCardSets = new List<List<CardScript>>();
-    private List<CardScript> currentCardList = new List<CardScript>();
+    private List<List<CardScript>> listOfCardSets = new List<List<CardScript>>();  // List of card sets used for storing player's card sets.
+    private List<CardScript> currentCardList = new List<CardScript>(); // Used as a copy of the player's cards list.
 
-    
+    // Creates appropriate card sets for Bot players and returns the card sets. 
     public List<List<CardScript>> GetCardSets(PlayerScript player, List<CardScript> cardList)
     {
         ClearCardRecords();
@@ -52,6 +53,7 @@ public class HandRankChecker : MonoBehaviour
         return new List<List<CardScript>>(listOfCardSets);
     }
     
+    // Creates TRAY card sets from available bot player's cards.  
     private void CheckForTraySets()
     {
         int traySetCounter = 0;
@@ -77,11 +79,6 @@ public class HandRankChecker : MonoBehaviour
             if(traySet.Count == 3)
             {
                 //Debug.Log("A Tray Set has been found.");
-                
-                // cardSets.Add(setsAdded, traySet);
-                // ++setsAdded;
-                
-                //listOfCardSets.Add(traySet);
 
                 handRankWiseDec[HandRank.TREY].Add(traySet);
 
@@ -93,7 +90,8 @@ public class HandRankChecker : MonoBehaviour
         //Debug.Log($"{traySetCounter} Tray Sets found.");
     }
 
-    // (A,3,2) of the same rank is a Secret Color Rank Set, it is the 2nd stringest Color Run set, only surpassed by (A,K,Q).
+    // Creates the Best or Secret COLOR RUN card set from available bot-player's cards.  
+    // (A,3,2) of the same rank is a secret COLOR RUN Set, it is the 2nd strongest COLOR RUN set, only surpassed by (A,K,Q).
     private void CheckForColorRunSpecialCase()
     {
         // 3 loops are done to account for the extremely rare case of having 3 sets of (A,K,Q).  
@@ -109,6 +107,7 @@ public class HandRankChecker : MonoBehaviour
         }
     }
 
+    // Creates the best COLOR RUN card set from available bot-player's cards (i.e. A,K,Q).  
     private void CheckForColorRunBestSet()
     {
         CardScript aceCard = currentCardList.Find(card => card.GetCardRank() == Rank.ACE);
@@ -134,6 +133,7 @@ public class HandRankChecker : MonoBehaviour
         }
     }
 
+    // Creates the secret COLOR RUN card set from available bot-player's cards (i.e. A,3,2). 
     private void CheckForSecretColorRun()
     {
         CardScript aceCard = currentCardList.Find(card => card.GetCardRank() == Rank.ACE);
@@ -159,6 +159,7 @@ public class HandRankChecker : MonoBehaviour
         }
     }
 
+    // Creates COLOR RUN card sets from available bot-player's cards. 
     private void CheckForColorRunSets()
     {
         //Debug.Log("Checking for Color Run Sets:");
@@ -192,6 +193,7 @@ public class HandRankChecker : MonoBehaviour
         //Debug.Log($"{colorRunSetCounter} Color Run Sets found.");
     }
     
+    // Creates the Best or Secret RUN card set from available bot-player's cards.
     // (A,3,2) is a Secret Color Rank Set, it is the 2nd stringest Color Run set, only surpassed by (A,K,Q).
     private void CheckForRunSpecialCase()
     {
@@ -208,6 +210,7 @@ public class HandRankChecker : MonoBehaviour
         }
     }
 
+    // Creates Best RUN card set from available bot-player's cards (i.e. A,K,Q).    
     private void CheckForRunBestSet()
     {
         CardScript aceCard = currentCardList.Find(card => card.GetCardRank() == Rank.ACE);
@@ -222,6 +225,7 @@ public class HandRankChecker : MonoBehaviour
         }
     }
 
+    // Creates secret RUN card set from available bot-player's cards (i.e. A,3,2).    
     private void CheckForSecretRun()
     {
         CardScript aceCard = currentCardList.Find(card => card.GetCardRank() == Rank.ACE);
@@ -236,6 +240,7 @@ public class HandRankChecker : MonoBehaviour
         }
     }
 
+    // Creates RUN card sets from available bot-player's cards.  
     private void CheckForRunSets()
     {   
         //Debug.Log("Checking for Run Sets:");
@@ -269,6 +274,7 @@ public class HandRankChecker : MonoBehaviour
         //Debug.Log($"{runSetCounter} Run Sets found.");
     }
 
+    // Creates COLOR card sets from available bot-player's cards.  
     private void CheckForColorSets()
     {
         foreach(Suit suitGroup in (Suit[])System.Enum.GetValues(typeof(Suit)))
@@ -297,6 +303,7 @@ public class HandRankChecker : MonoBehaviour
         ///Debug.Log($"{colorSetCounter} Color Sets have been found");
     }
 
+    // Creates PAIR card sets from available bot player's cards.  
     private void CheckForPairs()
     {
 
@@ -329,7 +336,8 @@ public class HandRankChecker : MonoBehaviour
 
         ///Debug.Log($"{pairSetCounter} Pair Sets found.");
     }
-
+    
+    // Creates HIGH CARD card sets from available bot player's cards.  
     private void CheckForHighCardSet()
     {
         int topCardCount = currentCardList.Count / 3;
@@ -374,17 +382,31 @@ public class HandRankChecker : MonoBehaviour
         //Debug.Log($"{highCardSetCounter} High Card Sets found.");
     }
 
+    // Sorts bot-players card sets from highest to lowest in Hand Rank. 
     private void SortCardSets()
     {
         foreach(HandRank handRank in handRankWiseDec.Keys)
-        {
+        {   
+            //Checks if there are multiple sets of the same Hand Rank.
             if(handRankWiseDec[handRank].Count > 1)
-            {
+            {   
+                // For RAIR and HIGH CARD : Compares rank of first card in set, then looks into cumulative rank of all cards in the set. 
                 if(handRank == HandRank.PAIR || handRank == HandRank.HIGHCARD)
-                {
-                    handRankWiseDec[handRank].Sort((set1, set2) => 
-                        GetRankValueOfFirstCard(set2).CompareTo(GetRankValueOfFirstCard(set1)));
+                {   
+                    handRankWiseDec[handRank].Sort((set1, set2) =>
+                    {
+                        int primaryComparison = GetRankValueOfFirstCard(set2).CompareTo(GetRankValueOfFirstCard(set1));
+
+                        if (primaryComparison == 0)
+                        {
+                            return GetCumulativeRankOfCards(set2).CompareTo(GetCumulativeRankOfCards(set1));
+                        }
+
+                        return primaryComparison;
+                    });
                 }
+                // For COLOR RUN and RUN : Compares rank of first card in set, then compares rank of second card in the set.
+                // This is done to account for the secret card set of COLOR RUN and RUN.   
                 else if(handRank == HandRank.COLORRUN || handRank == HandRank.RUN)
                 {
                     handRankWiseDec[handRank].Sort((set1, set2) =>
@@ -399,8 +421,9 @@ public class HandRankChecker : MonoBehaviour
                         return primaryComparison;
                     });
                 }
+                // For other Hand Ranks cumulative card rank of all cards in the set is compared. 
                 else
-                {
+                {   
                     handRankWiseDec[handRank].Sort((set1, set2) => 
                         GetCumulativeRankOfCards(set2).CompareTo(GetCumulativeRankOfCards(set1)));
                 }
@@ -408,6 +431,7 @@ public class HandRankChecker : MonoBehaviour
         }
     }
 
+    // Populates the listOfCardSets with the card sets created. 
     private void PopulateListOfCardSets()
     {
         listOfCardSets.Clear();
@@ -421,11 +445,13 @@ public class HandRankChecker : MonoBehaviour
         }
     }
 
+    // Returns the lowest ranked card from the available bot-player cards.
     private CardScript GetLowestRankCard()
     {
         return currentCardList[currentCardList.Count - 1];
     }
 
+    // Removes the cards in the given parameter cardSet from the currentCardList. 
     private void RemoveCardsFromList(List<CardScript> cardSet)
     {
         foreach(CardScript card in cardSet)
@@ -434,17 +460,19 @@ public class HandRankChecker : MonoBehaviour
         }
     }
 
-
+    // Sorts a given card list in Decending order. 
     private void SortCardList(List<CardScript> cardList)
     {
         cardList.Sort((card1, card2) => GetRankValue(card2.GetCardRank()).CompareTo(GetRankValue(card1.GetCardRank())));
     }
 
+    // Returns the rank value of a card. 
     private int GetRankValue(Rank rank)
     {
         return (int)rank;
     }
 
+    // Returns the combined card rank value of all cards in the given cardSet parameter. 
     private int GetCumulativeRankOfCards(List<CardScript> cardSet)
     {
         int cumulativeRank = 0;
@@ -457,15 +485,33 @@ public class HandRankChecker : MonoBehaviour
         return cumulativeRank;
     }
 
+    // Returns the rank of the first card in the given cardSet parameter.
     private int GetRankValueOfFirstCard(List<CardScript> cardSet)
     {
         return (GetRankValue(cardSet[0].GetCardRank()));
     }
 
+    // Returns the rank of the second card in the given cardSet parameter. 
     private int  GetRankValueOfSecondCard(List<CardScript> cardSet)
     {
         return (GetRankValue(cardSet[1].GetCardRank()));
     }
+
+    // Removes all cards from handRankWiseDec, listOfCardSets and currentCardList.
+    private void ClearCardRecords()
+    {
+        foreach(HandRank handRank in (HandRank[])System.Enum.GetValues(typeof(HandRank)))
+        {
+            handRankWiseDec[handRank].Clear();
+        }
+
+        listOfCardSets.Clear();
+        currentCardList.Clear();
+    }
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     private void PrintListOfCardSets()
     {   
@@ -490,14 +536,4 @@ public class HandRankChecker : MonoBehaviour
         }
     }
 
-    private void ClearCardRecords()
-    {
-        foreach(HandRank handRank in (HandRank[])System.Enum.GetValues(typeof(HandRank)))
-        {
-            handRankWiseDec[handRank].Clear();
-        }
-
-        listOfCardSets.Clear();
-        currentCardList.Clear();
-    }
 }

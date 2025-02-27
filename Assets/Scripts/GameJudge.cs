@@ -8,6 +8,7 @@ public enum HandRank {HIGHCARD, PAIR, COLOR, RUN, COLORRUN, TREY};
 
 public class GameJudge : MonoBehaviour
 {   
+    // HandRank-wise card set Dictionary used in sorting functions. 
     private Dictionary<HandRank, List<List<CardScript>>> trackingDic = new Dictionary<HandRank, List<List<CardScript>>>
                                                         {
                                                             {HandRank.HIGHCARD, new List<List<CardScript>>()},
@@ -17,6 +18,8 @@ public class GameJudge : MonoBehaviour
                                                             {HandRank.COLORRUN, new List<List<CardScript>>()},
                                                             {HandRank.TREY, new List<List<CardScript>>()}
                                                         };
+
+    // Finds the best card set from a given list of card sets, and returns it.  
     public List<CardScript> FindWinner(List<List<CardScript>> cardSetsOnTable)
     {
         ClearTrackingDictionary();
@@ -90,7 +93,6 @@ public class GameJudge : MonoBehaviour
                 }
             }
 
-            Debug.Log($"(Multiple) Winning index: {cardSetsOnTable.IndexOf(bestCardSet)}");
             Debug.Log("Best Card Set is:");
             PrintCardList(bestCardSet);
             
@@ -101,7 +103,6 @@ public class GameJudge : MonoBehaviour
         else
         {
             List<CardScript> bestCardSet = trackingDic[bestRank][0];
-            Debug.Log($"(One) Winning index: {cardSetsOnTable.IndexOf(bestCardSet)}");
             Debug.Log("Best Card Set is:");
             PrintCardList(bestCardSet);
 
@@ -111,7 +112,7 @@ public class GameJudge : MonoBehaviour
         }
     }
 
-
+    // Returns the combined card rank value of all cards in the given cardSet parameter. 
     private int GetCumulativeRankOfCards(List<CardScript> cardSet)
     {
         int cumulativeRank = 0;
@@ -124,16 +125,19 @@ public class GameJudge : MonoBehaviour
         return cumulativeRank;
     }
 
+    // Returns the rank of the first card in the given cardSet parameter.
     private int GetRankValueOfFirstCard(List<CardScript> cardSet)
     {
         return (GetRankValue(cardSet[0].GetCardRank()));
     }
 
+    // Returns the rank of the second card in the given cardSet parameter. 
     private int  GetRankValueOfSecondCard(List<CardScript> cardSet)
     {
         return (GetRankValue(cardSet[1].GetCardRank()));
     }
 
+    // Returns the HandRank of the given parameter cardSet.
     private HandRank GetSetRank(List<CardScript> cardSet)
     {
         if(CheckIfTray(cardSet))
@@ -162,6 +166,7 @@ public class GameJudge : MonoBehaviour
         }
     }
 
+    // Inserts the parameter cardSet into the trackingDic based on HandRank.
     private void SortByHandRank(List<CardScript> cardSet)
     {
         if(CheckIfTray(cardSet))
@@ -190,6 +195,7 @@ public class GameJudge : MonoBehaviour
         }
     }
 
+    // Checks if the given parameter cardSet is of the HandRank TRAY.
     private bool CheckIfTray(List<CardScript> cardSet)
     {
         Rank requiredRank = cardSet[0].GetCardRank();
@@ -203,6 +209,7 @@ public class GameJudge : MonoBehaviour
         return true;
     }
 
+    // Checks if the given parameter cardSet is of the HandRank COLOR RUN.
     private bool CheckIfColorRun(List<CardScript> cardSet)
     {
         if(CheckIfColor(cardSet))
@@ -219,6 +226,7 @@ public class GameJudge : MonoBehaviour
         }
     }
 
+    // Checks if the given parameter cardSet is of the HandRank RUN.
     private bool CheckIfRun(List<CardScript> cardSet)
     {
         if(cardSet[0].GetCardRank() == Rank.ACE && cardSet[1].GetCardRank() == Rank.THREE && cardSet[2].GetCardRank() == Rank.TWO)
@@ -238,6 +246,7 @@ public class GameJudge : MonoBehaviour
         return true;
     }
 
+    // Checks if the given parameter cardSet is of the HandRank COLOR.
     private bool CheckIfColor(List<CardScript> cardSet)
     {
         Suit requiredSuit = cardSet[0].GetCardSuit();
@@ -251,6 +260,7 @@ public class GameJudge : MonoBehaviour
         return true;
     }
 
+    // Checks if the given parameter cardSet is of the HandRank PAIR.
     private bool CheckIfPair(List<CardScript> cardSet)
     {
         if(cardSet[0].GetCardRank() == cardSet[1].GetCardRank())
@@ -260,8 +270,10 @@ public class GameJudge : MonoBehaviour
         return false;
     }
 
+    // Sorts the Main Player's card sets based on HandRank in Decending order. 
     public void SortMainPlayerCards(List<List<CardScript>> cardSetList)
     {   
+        // Sorts or makes proper sets out of the sets made by the Main Player. 
         foreach(var set in cardSetList)
         {
             MakeProperSet(set);
@@ -356,6 +368,7 @@ public class GameJudge : MonoBehaviour
         }
     }
 
+    // If Main player forgets to sort each set properly, then this funtion does it for him/her. 
     private void MakeProperSet(List<CardScript> cardSet)
     {
         if(SetHasPair(cardSet))
@@ -389,6 +402,7 @@ public class GameJudge : MonoBehaviour
         }
     }
 
+    //Checks of a given parameter cardSet has two cards of the same card rank. 
     bool SetHasPair(List<CardScript> cardSet)
     {
         if(cardSet.Count != 3)
@@ -403,6 +417,7 @@ public class GameJudge : MonoBehaviour
         return (rank1 == rank2) || (rank1 == rank3) || (rank2 == rank3);
     }
 
+    // Returns the rank of the pair cards from the given paremeter cardSet.
     private Rank FindPairRank(List<CardScript> cardSet)
     {   
         if(cardSet == null || cardSet.Count != 3)
@@ -430,16 +445,19 @@ public class GameJudge : MonoBehaviour
         throw new ArgumentException("Set does not countain pair");
     }
 
+    // Returns the card rank value of the given paramater rank. 
     private int GetRankValue(Rank rank)
     {
         return (int)rank;
     }
 
+    // Returns the HandRank value of the given paramater handRank. 
     private int GetHandRankValue(HandRank handRank)
     {
         return (int)handRank;
     }
 
+    // Clears the trackingDic dictionary. 
     private void ClearTrackingDictionary()
     {
         foreach(HandRank handRank in (HandRank[])System.Enum.GetValues(typeof(HandRank)))
@@ -447,6 +465,8 @@ public class GameJudge : MonoBehaviour
             trackingDic[handRank].Clear();
         }
     }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void PrintCardList(List<CardScript> cardList)
     {
